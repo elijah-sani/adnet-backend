@@ -1,6 +1,8 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { Cron, CronExpression } from '@nestjs/schedule';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { SchedulerRegistry } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
+import { CronJob } from 'cron';
 import { LessThan, Repository } from 'typeorm';
 import {
   Transaction,
@@ -14,7 +16,7 @@ export interface ReconciliationStatus {
 }
 
 @Injectable()
-export class ReconciliationService {
+export class ReconciliationService implements OnModuleInit {
   private readonly logger = new Logger(ReconciliationService.name);
 
   // In-memory state — intentionally not persisted to the database.
@@ -24,9 +26,26 @@ export class ReconciliationService {
   constructor(
     @InjectRepository(Transaction)
     private readonly transactionRepo: Repository<Transaction>,
+    private readonly schedulerRegistry: SchedulerRegistry,
+    private readonly configService: ConfigService,
   ) {}
 
-  @Cron(CronExpression.EVERY_5_MINUTES)
+  onModuleInit() {
+    const cronExpr =
+      this.configService.get<string>('RECONCILIATION_CRON') ?? '*/5 * * * *';
+
+    const job = new CronJob(cronExpr, () => {
+      void this.runReconciliation();
+    });
+
+    this.schedulerRegistry.addCronJob('reconciliation', job);
+    job.start();
+
+    this.logger.log(
+      `Reconciliation job scheduled with cron expression: "${cronExpr}"`,
+    );
+  }
+
   async runReconciliation(): Promise<void> {
     this.logger.log('Reconciliation job started');
 

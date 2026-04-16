@@ -1,4 +1,4 @@
-import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
 import { DebitTransactionDto } from './dto/debit-transaction.dto';
 import { DebitResponse, TransactionsService } from './transactions.service';
 
@@ -13,7 +13,6 @@ export class TransactionsController {
    * instructionId returns the original result without reprocessing.
    */
   @Post('debit')
-  @HttpCode(HttpStatus.OK)
   async debit(@Body() dto: DebitTransactionDto): Promise<DebitResponse> {
     return this.transactionsService.debit(dto);
   }
