@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Environment variables — never commit real secrets
+# NOTE: .env.example is intentionally NOT ignored (committed as a template)
+.env
+
+# Test coverage
+coverage/
+
+# Source maps
+*.js.map
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS specific files
+.DS_Store
+Thumbs.db
+
+# IDEs and Editors
+.idea/
+.vscode/
+
+# AI context / Agent config
+AGENTS.md
+agents.md
